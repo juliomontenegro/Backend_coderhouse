@@ -7,7 +7,7 @@ let precio = document.getElementById("price");
 let imagen = document.getElementById("thumbnail");
 
 
-
+ 
 
 
 boton.addEventListener("click", function(){

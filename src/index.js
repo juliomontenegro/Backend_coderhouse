@@ -1,4 +1,5 @@
-const API =require('./api');
+const SQLPRODUCTOS =require('./sqlproductos');
+const SQLMENSAJES=require('./sqlmensajes');
 const express = require('express');
 const {Router} = express;
 const router = Router();
@@ -6,17 +7,18 @@ const app = express();
 const path = require('path');
 const handlebars =require('express-handlebars');
 
-const fs = require('fs');
-const pathchat=(path.join(__dirname,'../public/chat-data/messages.json'));
 
+// const fs = require('fs');
 
+ 
 const { Server: HttpServer } = require("http");
 const { Server: IOServer } = require("socket.io");
 const httpServer = new HttpServer(app);
 const io = new IOServer(httpServer);
+ 
 
-
-let api= new API();
+let sqlproductos= new SQLPRODUCTOS();
+let sqlmensajes= new SQLMENSAJES();
 
 const PORT=8080;
 
@@ -59,20 +61,33 @@ app.get('/', (req, res) => {
 
 
    router.get("/", (req, res) => {
-      const response = api.getAll();
+   
+      sqlproductos.getAll().then(productos => {
+        res.render("productos", { productos });
+      }
+      ).catch(error => {
+        console.error(error);
+      });
+
     
-      if (!response) res.send({ error: productNotFound });
-    
-      res.render("productos", { productos: response });
     });
+
     
     router.post("/", (req, res) => {
+    
+    
       const { title, price, thumbnail } = req.body;
-    
-      api.add({ title, price, thumbnail });
-    
+     
+       
+      sqlproductos.add({ title, price, thumbnail });
       res.redirect("/");
     });
+
+
+//crear tablas
+sqlmensajes.createTable();
+sqlproductos.createTableProd();
+
 
 // socket.io
 const mensajesArray = [];
@@ -80,12 +95,21 @@ const mensajesArray = [];
 io.on("connection", (socket) => {
   console.log(`Nuevo cliente conectado ${socket.id}`);
 
-   socket.emit("productosServ", api.productos);
+  //  socket.emit("productosServ", api.productos);
+  // con socket emit traer todos los productos de la base de datos
+  sqlproductos.getAll().then(productos => {
+    socket.emit("productosServ", productos);
+  }
+  ).catch(error => {
+    console.error(error);
+  }
+  );
+
 
 
   socket.on("add-product", (data) => {
-    api.add(data);
-    io.sockets.emit("productosServ", api.productos);
+    sqlproductos.add(data);
+    io.sockets.emit("productosServ", sqlproductos.productos);
   });
   
 
@@ -93,19 +117,25 @@ io.on("connection", (socket) => {
 
   mensajesArray.push(message)
  
-fs.writeFileSync(pathchat,JSON.stringify(mensajesArray,null,2)+"\n");
- 
+// fs.writeFileSync(pathchat,JSON.stringify(mensajesArray,null,2)+"\n");
+// guardar mensajes en la base de datos con sqlite3
+sqlmensajes.add(mensajesArray);
 
 io.sockets.emit("nuevoMsj",mensajesArray);
 });
 
 if(mensajesArray.length>0){
-  fs.readFile(pathchat,(err,data)=>{
-    if(err) throw err;
-    let mensajes = JSON.parse(data);
+  // fs.readFile(pathchat,(err,data)=>{
+  //   if(err) throw err;
+  //   let mensajes = JSON.parse(data);
+  //   io.sockets.emit("nuevoMsj",mensajes);
+  //   });
+  sqlmensajes.getAll().then(mensajes => {
     io.sockets.emit("nuevoMsj",mensajes);
-    });
-
+  }
+  ).catch(error => {
+    console.error(error);
+  });
 }
 
 });

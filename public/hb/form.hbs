@@ -7,7 +7,7 @@
       <th scope="col">Precio</th>
       <th scope="col">Miniatura</th>
     </tr>
-    {{#if productos.length}}
+    {{#if productos}}
     {{#each productos}}
     <tr>
       <td>{{this.title}}</td>
@@ -16,7 +16,7 @@
     </tr>
     {{/each}}
     {{/if}}
-    {{#unless productos.length}}
+    {{#unless productos}}
     <tr>
       <td>No hay productos guardados</td>
       <td>No hay productos guardados</td>
