@@ -1,0 +1,59 @@
+[
+  {
+    "id": "mensajes",
+    "mensajes": [
+      {
+        "mensaje": "hola",
+        "fecha": "02/09/2022 16:46:19",
+        "autor": {
+          "id": "mailfake@gmail.com",
+          "nombre": "nombrerandom",
+          "apellido": "apellidorandom",
+          "edad": "145",
+          "alias": "aliasrandom",
+          "avatar": "https://icon-library.com/images/avatar-icon-png/avatar-icon-png-10.jpg"
+        },
+        "id": 1
+      },
+      {
+        "mensaje": "como estas?",
+        "fecha": "02/09/2022 16:48:13",
+        "autor": {
+          "id": "mailfake@gmail.com",
+          "nombre": "nombrerandom",
+          "apellido": "apellidorandom",
+          "edad": "145",
+          "alias": "aliasrandom",
+          "avatar": "https://icon-library.com/images/avatar-icon-png/avatar-icon-png-10.jpg"
+        },
+        "id": 2
+      },
+      {
+        "mensaje": "Muy bien y vos?",
+        "fecha": "02/09/2022 16:49:19",
+        "autor": {
+          "id": "mailfake2@gmail.com",
+          "nombre": "nombrerandom2",
+          "apellido": "apellidorandom2",
+          "edad": "900",
+          "alias": "aliasrandom2",
+          "avatar": "https://icon-library.com/images/avatar-icon-png/avatar-icon-png-9.jpg"
+        },
+        "id": 3
+      },
+      {
+        "mensaje": "bien.",
+        "fecha": "02/09/2022 16:49:39",
+        "autor": {
+          "id": "mailfake@gmail.com",
+          "nombre": "nombrerandom",
+          "apellido": "apellidorandom",
+          "edad": "145",
+          "alias": "aliasrandom",
+          "avatar": "https://icon-library.com/images/avatar-icon-png/avatar-icon-png-10.jpg"
+        },
+        "id": 4
+      }
+    ]
+  }
+]

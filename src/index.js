@@ -5,6 +5,8 @@ const router = Router();
 const app = express();
 const path = require('path');
 const handlebars =require('express-handlebars');
+const faker=require('faker');
+const { schema, normalize, denormalize } = require('normalizr');
 
 const fs = require('fs');
 const pathchat=(path.join(__dirname,'../public/chat-data/messages.json'));
@@ -12,6 +14,7 @@ const pathchat=(path.join(__dirname,'../public/chat-data/messages.json'));
 
 const { Server: HttpServer } = require("http");
 const { Server: IOServer } = require("socket.io");
+
 const httpServer = new HttpServer(app);
 const io = new IOServer(httpServer);
 
@@ -64,18 +67,33 @@ app.get('/', (req, res) => {
       if (!response) res.send({ error: productNotFound });
     
       res.render("productos", { productos: response });
-    });
+    }); 
     
     router.post("/", (req, res) => {
       const { title, price, thumbnail } = req.body;
-    
       api.add({ title, price, thumbnail });
-    
+      res.redirect("/");
+    });
+
+    //generar 5 productos con faker en la ruta  /api/productos-test
+    router.get("/api/productos-test", (req, res) => { 
+      faker.locale="es";
+      for (let i = 0; i < 5; i++) {
+        api.add({
+          title: faker.commerce.productName(),
+          price: faker.commerce.price(),
+          thumbnail: faker.image.image(),
+        });
+      }
+      
       res.redirect("/");
     });
 
 // socket.io
-const mensajesArray = [];
+const mensajesArray = [{
+   id:"mensajes",
+    mensajes:[]
+  }];
 
 io.on("connection", (socket) => {
   console.log(`Nuevo cliente conectado ${socket.id}`);
@@ -90,24 +108,51 @@ io.on("connection", (socket) => {
   
 
   socket.on('mensaje', message => {
+    //asigno una id a cada mensaje
+    message.id=mensajesArray[0].mensajes.length+1; 
+    mensajesArray[0].mensajes.push(message); 
+   
+    fs.writeFileSync(pathchat,JSON.stringify(mensajesArray,null,2)+"\n");
+    // io.sockets.emit("nuevoMsj",mensajesArray);
 
-  mensajesArray.push(message)
- 
-fs.writeFileSync(pathchat,JSON.stringify(mensajesArray,null,2)+"\n");
- 
-
-io.sockets.emit("nuevoMsj",mensajesArray);
+// normalizr
+const autor = new schema.Entity('autor');
+const mensajes = new schema.Entity('mensajes', {
+  autor: autor
+});
+const chat= new schema.Entity('chat', {
+  mensajes: [mensajes]
 });
 
-if(mensajesArray.length>0){
+const chatnormalizado = normalize(mensajesArray, [chat]);
+console.log(chatnormalizado);
+const pathchatNormalizado=(path.join(__dirname,'../public/chat-data/chatNormalizado.json'));
+
+fs.writeFileSync(pathchatNormalizado, JSON.stringify(chatnormalizado, null, '\t'));
+
+// denormalizar
+const chatdenormalizado = denormalize(chatnormalizado.result, [chat], chatnormalizado.entities);
+
+io.sockets.emit("nuevoMsj",chatdenormalizado);
+
+ 
+});
+
+if(fs.existsSync(pathchat)){
   fs.readFile(pathchat,(err,data)=>{
     if(err) throw err;
     let mensajes = JSON.parse(data);
     io.sockets.emit("nuevoMsj",mensajes);
     });
 
+
+
+
+
+  
 }
 
+
 });
-  
+
 
