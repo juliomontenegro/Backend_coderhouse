@@ -7,6 +7,9 @@ const path = require('path');
 const handlebars =require('express-handlebars');
 const faker=require('faker');
 const { schema, normalize, denormalize } = require('normalizr');
+const MongoStore = require('connect-mongo');
+const cookieParser = require('cookie-parser');
+require("dotenv").config();
 
 const fs = require('fs');
 const pathchat=(path.join(__dirname,'../public/chat-data/messages.json'));
@@ -14,6 +17,7 @@ const pathchat=(path.join(__dirname,'../public/chat-data/messages.json'));
 
 const { Server: HttpServer } = require("http");
 const { Server: IOServer } = require("socket.io");
+const session = require('express-session');
 
 const httpServer = new HttpServer(app);
 const io = new IOServer(httpServer);
@@ -36,7 +40,20 @@ server.on("error", (error) => {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '..', './public')))
+app.use(cookieParser());
 app.use('/productos', router);
+app.use(
+  session({
+    store: MongoStore.create({
+      mongoUrl: `mongodb+srv://${process.env.MONGOUSER}:${process.env.MONGOPASS}@${process.env.MONGO_CLUSTER}.mongodb.net/?retryWrites=true&w=majority`,
+      mongoOptions: {useNewUrlParser: true,useUnifiedTopology: true,},
+      ttl:60
+    }),
+    secret: 'asdafsfgdfgdfg',
+    resave: false,
+    saveUninitialized: false,
+  }))
+
 
 
 
@@ -88,6 +105,32 @@ app.get('/', (req, res) => {
       
       res.redirect("/");
     });
+
+
+    //logueo simple 
+    app.post("/api/login", (req, res) => {
+      const usuario = req.body.usuario;
+        req.session.user = {usuario:usuario};
+        res.send({mensaje:"Usuario logueado"});
+
+    });
+
+
+      
+
+
+    //logueo current
+    app.get("/api/current", (req, res) => {
+   
+        res.send({ usuario: req.session.user });
+
+    });
+    //logout
+    app.get("/api/logout", (req, res) => {
+      req.session.destroy();
+      res.send({ usuario: null });
+    });
+    
 
 // socket.io
 const mensajesArray = [{

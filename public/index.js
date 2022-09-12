@@ -106,6 +106,54 @@ fetch("/productos/api/productos-test")
 
 
 
+    
+//plantilla login
+const plantillaLogin= async()=>{
+    const response = await fetch("/api/current")
+    const usuario = await response.json()
+    const archivoTemplate=await fetch("./hb/login.hbs");
+    const plantilla = await archivoTemplate.text();
+    const template = Handlebars.compile(plantilla);
+    document.getElementById("login").innerHTML = template({usuario});
+
+    }
+
+plantillaLogin()
+
+const desloguear= async()=>{
+    const response = await fetch("/api/current")
+    const usuario = await response.json()
+
+    document.getElementById("login").innerHTML = `<h3 class="text-danger text-center">Hasta Luego ${usuario.usuario.usuario}!</h3>`;
+    const responselogout= await fetch("/api/logout")
+    const logout= await responselogout.json()
+    setTimeout(plantillaLogin, 2000);
+
+    }
+
+const loguear= async()=>{
+    let usuario = document.getElementById("usuario");
+
+    const response = await fetch("/api/login", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            usuario: usuario.value,
+        }),
+    });
+    const login = await response.json();
+    plantillaLogin()
+    return login;
+  
+    }
+
+
+
+
+
+
 email.value=localStorage.getItem("email");
 nombre.value=localStorage.getItem("nombre");
 apellido.value=localStorage.getItem("apellido");
