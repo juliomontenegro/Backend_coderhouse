@@ -1,5 +1,6 @@
 const socket = io.connect();
 
+
 // usando socket para enviar los productos al servidor
 let boton = document.getElementById("boton");
 let titulo = document.getElementById("title");
@@ -20,17 +21,40 @@ boton.addEventListener("click", function(){
 });
 
 socket.on("productosServ", (data) => {
-fetch("./hb/form.hbs")
-.then(response => response.text())
-.then(plantilla => {
+    let plantilla=`<div class="mt-3 w-75 mx-auto">
+    <h1 class="text-center">Lista de productos guardados</h1>
+  
+    <table class="table table-dark mt-3 ">
+      <tr>
+        <th scope="col">Título</th>
+        <th scope="col">Precio</th>
+        <th scope="col">Miniatura</th>
+      </tr>
+      {{#if productos.length}}
+      {{#each productos}}
+      <tr>
+        <td>{{this.title}}</td>
+        <td>{{this.price}}</td>
+        <td><img height="72px" width="72px" src={{this.thumbnail}} /></td>
+      </tr>
+      {{/each}}
+      {{/if}}
+      {{#unless productos.length}}
+      <tr>
+        <td>No hay productos guardados</td>
+        <td>No hay productos guardados</td>
+        <td>No hay productos guardados</td>
+      </tr>
+      {{/unless}}
+    </table>`;
     let productos = data
     let template = Handlebars.compile(plantilla);
     document.getElementById("contenidoTabla").innerHTML =template({productos});
 }
 )
-.catch(error => console.log(error,"queres plantilla? no hay plantilla"));
-}
-);
+
+
+
 
 
 // Centro de Mensajes
@@ -109,10 +133,14 @@ fetch("/productos/api/productos-test")
     
 //plantilla login
 const plantillaLogin= async()=>{
-    const response = await fetch("/api/current")
+    const response = await fetch("/api/sessions/current")
     const usuario = await response.json()
-    const archivoTemplate=await fetch("./hb/login.hbs");
-    const plantilla = await archivoTemplate.text();
+    const plantilla = `{{#if usuario.usuario}}
+    <div class="container pt-4">
+    <h4>Bienvenido: {{usuario.usuario.name}}</h4>
+    <button onclick=desloguear() class="btn btn-danger" >Desloguear</button>
+    </div>
+    {{/if}}`;
     const template = Handlebars.compile(plantilla);
     document.getElementById("login").innerHTML = template({usuario});
 
@@ -121,33 +149,18 @@ const plantillaLogin= async()=>{
 plantillaLogin()
 
 const desloguear= async()=>{
-    const response = await fetch("/api/current")
+    const response = await fetch("/api/sessions/current")
     const usuario = await response.json()
 
-    document.getElementById("login").innerHTML = `<h3 class="text-danger text-center">Hasta Luego ${usuario.usuario.usuario}!</h3>`;
-    const responselogout= await fetch("/api/logout")
+    document.getElementById("login").innerHTML = `<h3 class="text-danger text-center">Hasta Luego ${usuario.usuario.name}!</h3>`;
+    const responselogout= await fetch("/api/sessions/logout")
     const logout= await responselogout.json()
-    setTimeout(plantillaLogin, 2000);
+ 
+    plantillaLogin
+    setTimeout(()=>{ location.reload(); }, 2000);
 
     }
 
-const loguear= async()=>{
-    let usuario = document.getElementById("usuario");
-
-    const response = await fetch("/api/login", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-            usuario: usuario.value,
-        }),
-    });
-    const login = await response.json();
-    plantillaLogin()
-    return login;
-  
-    }
 
 
 
