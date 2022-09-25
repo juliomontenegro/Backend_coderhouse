@@ -33,7 +33,7 @@ let api= new API();
 
 const httpServer = new HttpServer(app);
 const io = new IOServer(httpServer);
-const pathchat=(path.join(__dirname,'../public/chat-data/messages.json'));
+const pathchat=(path.join(__dirname,'./public/chat-data/messages.json'));
 
 
 const server = httpServer.listen(PORT, () => {
