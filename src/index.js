@@ -4,6 +4,7 @@ import __dirname from './utils.js';
 import handlebars from 'express-handlebars';
 import viewRoutes from './routes/viewRoutes.js';
 import sessionRoutes from './routes/sessionRoutes.js';
+import calculationRouter from './routes/calculationRouter.js';
 import cookieParser from 'cookie-parser';
 import session from 'express-session';
 import mongoose from 'mongoose';
@@ -15,10 +16,13 @@ import faker from 'faker';
 import {schema, normalize, denormalize  } from 'normalizr';
 import fs from 'fs';
 import path from 'path';
+import args from './config/nodeArguments.js';
 //socket io
 import { Server as HttpServer } from "http";
 import { Server as IOServer } from "socket.io";
 import API from './api.js'
+
+
 
 const router=Router();
 
@@ -27,7 +31,7 @@ const router=Router();
 dotenv.config();
 
 const app = express();
-const PORT=8080;
+const {PORT}= args
 
 let api= new API();
 
@@ -70,6 +74,7 @@ app.set('views',__dirname+ '/views');
 app.use('/', viewRoutes);
 app.use('/api/sessions', sessionRoutes);
 app.use('/productos', router);
+app.use('/api/randoms',calculationRouter);
 
 
 initializePassport();

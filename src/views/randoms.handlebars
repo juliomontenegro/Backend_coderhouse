@@ -1,0 +1,30 @@
+{{!-- table with each random numbers  --}}
+<div class="container">
+<div class="row">
+<div class="col-md-12">
+<h2 class="text-center heading-section">Numeros Aleatorios</h2>
+<div class="table-wrap">
+<table class="table table-bordered">
+<thead class="thead">
+<th>Numero Aleatorio</th>
+</thead>
+<tbody>
+{{#each payload}}
+<tr>
+<td>El numero "{{@key}}" aparecio esta cantidad aleatoria de veces: {{this}}</td>
+</tr>
+{{/each}}
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+
+
+
+
+
+
+
+
