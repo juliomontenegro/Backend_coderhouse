@@ -1,5 +1,6 @@
 import {Router} from 'express';
 import args from '../config/nodeArguments.js';
+import os from 'os';
 
 
 const router = Router();
@@ -33,15 +34,13 @@ router.get('/', (req, res) => {
       rss:process.memoryUsage().rss,
       execPath:process.execPath,
       processId:process.pid,
-      currentDirectory:process.cwd()
+      currentDirectory:process.cwd(),
+      cpuLength:os.cpus().length,
   }
 
     res.render('info',{information});
   })
 
-  // router.get('/api/randoms',(req,res)=>{
-  //   res.render('randoms');
-  // })
 
 
   export default router;
