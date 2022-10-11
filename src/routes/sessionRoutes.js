@@ -30,6 +30,4 @@ router.get('/loginfail',(req,res)=>{
 })
 
 
-
-
 export default router;

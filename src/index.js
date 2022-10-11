@@ -21,6 +21,13 @@ import args from './config/nodeArguments.js';
 import { Server as HttpServer } from "http";
 import { Server as IOServer } from "socket.io";
 import API from './api.js'
+import compression from 'compression';
+import {debugLogger } from './utils.js';
+import productRouter from './routes/productRouter.js';
+
+
+
+
 
 
 
@@ -38,7 +45,8 @@ let api= new API();
 const httpServer = new HttpServer(app);
 const io = new IOServer(httpServer);
 const pathchat=(path.join(__dirname,'./public/chat-data/messages.json'));
-
+//utilizar compression
+// app.use(compression());
 
 const server = httpServer.listen(PORT, () => {
   console.log(`Servidor escuchando en puerto ${PORT}`);
@@ -50,6 +58,7 @@ server.on("error", (error) => {
 //conexion a mongo
 mongoose.connect(`mongodb+srv://${process.env.MONGOUSER}:${process.env.MONGOPASS}@${process.env.MONGO_CLUSTER}.mongodb.net/?retryWrites=true&w=majority`, {useNewUrlParser: true, useUnifiedTopology: true})
 .then(()=>{console.log('Conectado a Mongo')});
+
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -73,33 +82,21 @@ app.set('view engine', 'handlebars');
 app.set('views',__dirname+ '/views');
 app.use('/', viewRoutes);
 app.use('/api/sessions', sessionRoutes);
-app.use('/productos', router);
-app.use('/api/randoms',calculationRouter);
+// app.use('/api/randoms',calculationRouter);
+app.use('/productos', productRouter)
 
 
+
+ 
 initializePassport();
 app.use(passport.initialize());
 app.use(passport.session());
 
 
-//productos
-router.get("/", (req, res) => {
-    const response = api.getAll();
-  
-    if (!response) res.send({ error: productNotFound });
-  
-    res.render("productos", { productos: response });
-  }); 
-  
-  router.post("/", (req, res) => {
-    const { title, price, thumbnail } = req.body;
-    api.add({ title, price, thumbnail });
-    res.redirect("/");
-  });
-
   //generar 5 productos con faker en la ruta  /api/productos-test
   router.get("/api/productos-test", (req, res) => { 
     faker.locale="es";
+   
     for (let i = 0; i < 5; i++) {
       api.add({
         title: faker.commerce.productName(),
@@ -111,9 +108,8 @@ router.get("/", (req, res) => {
     res.redirect("/");
   });
 
-      //logueo current
+      //login current
       app.get("/api/sessions/current", (req, res) => {
-   
         res.send({ usuario: req.session.user });
 
     });
@@ -121,6 +117,11 @@ router.get("/", (req, res) => {
     app.get("/api/sessions/logout", (req, res) => {
       req.session.destroy();
       res.send({ usuario: null });
+    });
+    //invalid routes
+    app.get('*', (req, res) => {
+      debugLogger.warn(`Invalid Routes: ${req.hostname + req.originalUrl}`);
+      res.status(404).send('🚧 404 not found 🚧')
     });
 
 
@@ -132,13 +133,16 @@ const mensajesArray = [{
    }];
  
  io.on("connection", (socket) => {
-   console.log(`Nuevo cliente conectado ${socket.id}`);
+  
+   debugLogger.info(`New client connected ${socket.id}`);
  
     socket.emit("productosServ", api.productos);
- 
+    debugLogger.info(`get all products: ${api.productos.length}`);
  
    socket.on("add-product", (data) => {
+    debugLogger.info(`adding product`);
      api.add(data);
+     debugLogger.info(`product added`);
      io.sockets.emit("productosServ", api.productos);
    });
    
@@ -146,7 +150,9 @@ const mensajesArray = [{
    socket.on('mensaje', message => {
      //asigno una id a cada mensaje
      message.id=mensajesArray[0].mensajes.length+1; 
+     debugLogger.info(`adding message`);
      mensajesArray[0].mensajes.push(message); 
+      debugLogger.info(`message added`);
     
      fs.writeFileSync(pathchat,JSON.stringify(mensajesArray,null,2)+"\n");
      // io.sockets.emit("nuevoMsj",mensajesArray);
@@ -186,3 +192,5 @@ const mensajesArray = [{
  
  });
  
+
+

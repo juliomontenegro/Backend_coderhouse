@@ -1,46 +1,52 @@
+import {debugLogger } from './utils.js';
+
 class api {
 
     productos = [];
     
- //    agregar un producto
+ //add product
     add(producto) {
          this.productos.push(producto);
+         debugLogger.info(`add product: ${producto.title}`);
       }
  
- // asignar una id a un producto.
+ //assigning an id to a product.
  
      getId() {
          return this.productos.length > 0 ? this.productos[this.productos.length - 1].id + 1 : 1;
      }
  
- // buscar en el array un producto por su id devolver error en caso que no exista.
+ // find product by id
      getById(id) {
          const producto = this.productos.find(producto => producto.id === id);
          if (!producto) {
-             throw new Error('Producto no encontrado');
+            debugLogger.error(`Product not found id: ${id}`);
+             throw new Error('Product not found');
          }
          return producto;
      }
  
- // Obtener todos los productos
+ // getall products
      getAll() {
          return this.productos;
      }
- // update de un producto segun su id
+ // update product by id
      update(id, producto) {
          const index = this.productos.findIndex(producto => producto.id === id);
  
          if(!index){
-             throw new Error('Producto no encontrado');
+            debugLogger.error(`Update Product not found id: ${id}`);
+             throw new Error('Update Product not found');
          }
              this.productos[index] = producto
              this.productos[index].id = id;
      }
  
- // eliminar un producto del array segun su id
+ //delete product by id
      delete(id) {
          if(!this.getById(id)){
-             throw new Error('Producto no encontrado');
+            debugLogger.error(`failed to delete product with id: ${id}`);
+             throw new Error('failed to delete product');
          }
          this.productos.splice(this.productos.findIndex(producto => producto.id === id),1);
      }

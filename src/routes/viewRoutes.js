@@ -36,8 +36,10 @@ router.get('/', (req, res) => {
       processId:process.pid,
       currentDirectory:process.cwd(),
       cpuLength:os.cpus().length,
-  }
+      mode:args.m,
 
+  }
+    console.log(information);
     res.render('info',{information});
   })
 
