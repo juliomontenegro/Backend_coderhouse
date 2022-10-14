@@ -31,7 +31,7 @@ const router=Router();
 dotenv.config();
 
 const app = express();
-const {PORT}= args
+const {PORT}= args||process.env.PORT;
 
 let api= new API();
 
