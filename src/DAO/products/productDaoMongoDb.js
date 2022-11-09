@@ -1,4 +1,4 @@
-import{containerMongoDb}from'../../api/ContainerMongoDb.js';
+import{containerMongoDb}from'../../api/containerMongoDb.js';
 import{productSchema}from'../../models/productModels.js';
 
 class productDaoMongoDb extends containerMongoDb{
